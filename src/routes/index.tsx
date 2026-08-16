@@ -2,20 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Crown, Shield, Swords, Timer, Trophy, Users } from "lucide-react";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")(({
   head: () => ({
     meta: [
-      { title: "Startup Clash Quiz — Battle Your Entrepreneurial Knowledge" },
-      { name: "description", content: "Real-time entrepreneurship quiz battles. Speed-based scoring, live leaderboard, medieval gaming UI." },
+      { title: "QuizForge — Real-Time Quiz Arena | HackOS" },
+      { name: "description", content: "Real-time competitive quiz battles. Speed-based scoring, live leaderboard, medieval gaming UI. Powered by HackOS." },
     ],
   }),
   component: Landing,
-});
+}));
 
 const features = [
   { icon: Trophy, title: "Real-Time Leaderboard", desc: "Live ranks update after every battle round." },
   { icon: Timer, title: "Speed-Based Scoring", desc: "Faster answers earn more glory points." },
-  { icon: Shield, title: "Startup Questions", desc: "20 forged questions on entrepreneurship lore." },
+  { icon: Shield, title: "Curated Questions", desc: "Expertly forged questions across all domains." },
   { icon: Users, title: "Live Competition", desc: "Warriors clash simultaneously in the arena." },
 ];
 
@@ -31,7 +31,7 @@ function Landing() {
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-card/40 px-4 py-1.5 text-xs uppercase tracking-widest text-gold"
         >
-          <Crown className="h-3.5 w-3.5" /> Season 1 · Live Now
+          <Crown className="h-3.5 w-3.5" /> HackOS presents QuizForge
         </motion.div>
 
         <motion.h1
@@ -39,14 +39,21 @@ function Landing() {
           transition={{ delay: 0.1, type: "spring" }}
           className="mt-6 font-display text-5xl sm:text-7xl lg:text-8xl font-black text-gold text-stroke leading-[0.95]"
         >
-          Startup Clash Quiz
+          QuizForge
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
-          className="mt-5 text-lg sm:text-2xl text-muted-foreground"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+          className="mt-2 font-display text-lg sm:text-2xl text-gold/70 uppercase tracking-[0.15em]"
         >
-          ⚔️ Battle Your Entrepreneurial Knowledge ⚔️
+          Live Quiz Battle
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+          className="mt-4 text-base sm:text-xl text-muted-foreground"
+        >
+          ⚔️ Think Fast. Answer Faster. Conquer the Leaderboard. ⚔️
         </motion.p>
 
         <motion.div

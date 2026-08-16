@@ -6,7 +6,7 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { useQuiz, calculatePoints } from "@/store/quiz-store";
 
 export const Route = createFileRoute("/quiz")({
-  head: () => ({ meta: [{ title: "Live Battle — Startup Clash" }] }),
+  head: () => ({ meta: [{ title: "Live Battle — QuizForge" }] }),
   component: Quiz,
 });
 

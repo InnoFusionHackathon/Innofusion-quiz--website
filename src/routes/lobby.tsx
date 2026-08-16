@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useQuiz } from "@/store/quiz-store";
 
 export const Route = createFileRoute("/lobby")({
-  head: () => ({ meta: [{ title: "Waiting Lobby — Startup Clash" }] }),
+  head: () => ({ meta: [{ title: "Waiting Lobby — QuizForge" }] }),
   component: Lobby,
 });
 

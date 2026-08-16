@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — Startup Clash" }] }),
+  head: () => ({ meta: [{ title: "Admin Dashboard — QuizForge" }] }),
   component: Admin,
 });
 
@@ -45,7 +45,7 @@ function Admin() {
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "startup-clash-results.csv"; a.click();
+    a.href = url; a.download = "quizforge-results.csv"; a.click();
     URL.revokeObjectURL(url);
   };
   // Auth lives ONLY in React state — never persisted to sessionStorage / localStorage / cookies.

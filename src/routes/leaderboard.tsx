@@ -4,7 +4,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { useQuiz } from "@/store/quiz-store";
 
 export const Route = createFileRoute("/leaderboard")({
-  head: () => ({ meta: [{ title: "Live Leaderboard — Startup Clash" }] }),
+  head: () => ({ meta: [{ title: "Live Leaderboard — QuizForge" }] }),
   component: LeaderboardPage,
 });
 

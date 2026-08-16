@@ -6,7 +6,7 @@ import { useQuiz } from "@/store/quiz-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/join")({
-  head: () => ({ meta: [{ title: "Join the Battle — Startup Clash" }] }),
+  head: () => ({ meta: [{ title: "Join the Battle — QuizForge" }] }),
   component: Join,
 });
 

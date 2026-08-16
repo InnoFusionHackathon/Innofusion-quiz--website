@@ -52,10 +52,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Startup Clash Quiz — Battle Your Entrepreneurial Knowledge" },
-      { name: "description", content: "Real-time, Clash-of-Clans-inspired quiz arena for startup and entrepreneurship battles." },
-      { property: "og:title", content: "Startup Clash Quiz" },
-      { property: "og:description", content: "Battle Your Entrepreneurial Knowledge." },
+      { title: "QuizForge — Real-Time Quiz Arena | HackOS" },
+      { name: "description", content: "Real-time competitive quiz arena. Think fast, answer faster, conquer the leaderboard. Powered by HackOS." },
+      { property: "og:title", content: "QuizForge | HackOS" },
+      { property: "og:description", content: "Real-Time Competitive Quiz Arena. Think Fast. Answer Faster." },
       { property: "og:type", content: "website" },
     ],
     links: [
