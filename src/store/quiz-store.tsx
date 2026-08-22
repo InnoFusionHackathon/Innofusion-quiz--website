@@ -48,7 +48,7 @@ export type Participant = {
 };
 
 export type QuizStatus = "idle" | "lobby" | "running" | "finished";
-export type QuizPhase = "intro" | "answering" | "reveal" | "leaderboard";
+export type QuizPhase = "intro" | "answering" | "reveal";
 
 export type QuizState = {
   status: QuizStatus;
@@ -252,14 +252,6 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         currentQuestion: prev.currentQuestion
           ? { ...prev.currentQuestion, options: data.options }
           : prev.currentQuestion,
-      }));
-    });
-
-    socket.on("show_leaderboard_phase", (data: any) => {
-      console.log("🏆 Leaderboard phase:", data);
-      setState((prev) => ({
-        ...prev,
-        phase: data.phase,
       }));
     });
 
