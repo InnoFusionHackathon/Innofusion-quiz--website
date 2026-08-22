@@ -4,7 +4,7 @@ import { Download, ListChecks, Play, RotateCcw, SkipForward, Square, Trophy, Use
 import { useQuiz } from "@/store/quiz-store";
 import { Leaderboard } from "@/components/Leaderboard";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — QuizForge" }] }),
@@ -78,20 +78,98 @@ function Admin() {
   }, [socket]);
 
   // Fetch questions from admin status endpoint
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/admin/status`);
-        const data = await res.json();
-        if (data.success && data.questions) {
-          setQuestions(data.questions);
-        }
-      } catch (error) {
-        console.error("Failed to fetch admin data:", error);
+  const fetchAdminData = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/status`);
+      const data = await res.json();
+      if (data.success && data.questions) {
+        setQuestions(data.questions);
       }
-    };
-    fetchAdminData();
+    } catch (error) {
+      console.error("Failed to fetch admin data:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAdminData();
+  }, [fetchAdminData]);
+
+  // Question Management State
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [qFormData, setQFormData] = useState({ question: "", options: ["", "", "", ""], correctIndex: 0 });
+
+  const openAddModal = () => {
+    setQFormData({ question: "", options: ["", "", "", ""], correctIndex: 0 });
+    setEditingQuestionId(null);
+    setIsQuestionModalOpen(true);
+  };
+
+  const openEditModal = (q: AdminQuestion) => {
+    const opts = [...q.options];
+    while (opts.length < 4) opts.push("");
+    const correctIdx = Math.max(0, q.options.indexOf(q.correct_answer));
+    setQFormData({ question: q.question, options: opts.slice(0, 4), correctIndex: correctIdx });
+    setEditingQuestionId(q.id);
+    setIsQuestionModalOpen(true);
+  };
+
+  const handleSaveQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const correct_answer = qFormData.options[qFormData.correctIndex];
+    if (!qFormData.question || qFormData.options.some(o => !o.trim()) || !correct_answer) {
+      toast.error("Please fill all fields properly");
+      return;
+    }
+
+    const payload = {
+      question: qFormData.question,
+      options: qFormData.options.filter(o => o.trim()),
+      correct_answer
+    };
+
+    try {
+      let res;
+      if (editingQuestionId) {
+        res = await fetch(`${API_BASE}/api/admin/questions/${editingQuestionId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetch(`${API_BASE}/api/admin/questions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      }
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message);
+        setIsQuestionModalOpen(false);
+        fetchAdminData();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error("Failed to save question");
+    }
+  };
+
+  const handleDeleteQuestion = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this question?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/questions/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Question deleted");
+        fetchAdminData();
+      }
+    } catch (err) {
+      toast.error("Failed to delete question");
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -277,19 +355,114 @@ function Admin() {
         </div>
 
         <div className="wood-panel p-6">
-          <h2 className="font-display text-xl font-bold text-gold mb-4">📜 Question Bank ({questions.length})</h2>
-          <div className="max-h-72 overflow-y-auto space-y-2 text-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-xl font-bold text-gold">📜 Question Bank ({questions.length})</h2>
+            <button onClick={openAddModal} className="btn-medieval py-1.5 px-4 text-sm flex items-center gap-2">
+              <span className="text-xl leading-none">+</span> Add Question
+            </button>
+          </div>
+          <div className="max-h-72 overflow-y-auto space-y-2 text-sm pr-2">
             {questions.map((q, i) => (
-              <div key={q.id} className={`rounded-lg border-2 px-4 py-2.5 ${
+              <div key={q.id} className={`rounded-lg border-2 px-4 py-2.5 flex items-center justify-between ${
                 i === state.currentQuestionIndex && state.status === "running"
                   ? "border-gold bg-gold/10" : "border-border/60 bg-card/40"
               }`}>
-                <div className="font-bold">Q{i + 1}. {q.question}</div>
-                <div className="text-xs text-emerald-400 mt-0.5">✓ {q.correct_answer}</div>
+                <div>
+                  <div className="font-bold">Q{i + 1}. {q.question}</div>
+                  <div className="text-xs text-emerald-400 mt-0.5">✓ {q.correct_answer}</div>
+                </div>
+                <div className="flex items-center gap-2 ml-4">
+                  <button onClick={() => openEditModal(q)} className="p-2 rounded-md hover:bg-white/10 text-muted-foreground hover:text-gold transition-colors">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 rounded-md hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors">
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
+            {questions.length === 0 && (
+              <div className="text-center p-6 text-muted-foreground border-2 border-dashed border-border/50 rounded-xl">
+                No questions found. Add your first question to begin!
+              </div>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Question Modal */}
+      <AnimatePresence>
+        {isQuestionModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="wood-panel p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-display text-2xl font-black text-gold">
+                  {editingQuestionId ? "Edit Question" : "Add New Question"}
+                </h2>
+                <button onClick={() => setIsQuestionModalOpen(false)} className="p-2 hover:bg-white/10 rounded-lg text-muted-foreground">
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveQuestion} className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gold mb-2">Question Text</label>
+                  <textarea
+                    value={qFormData.question}
+                    onChange={e => setQFormData(prev => ({ ...prev, question: e.target.value }))}
+                    className="w-full rounded-lg border-2 border-border bg-input/50 px-4 py-3 text-foreground focus:border-gold focus:outline-none min-h-[100px]"
+                    placeholder="Enter the question here..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gold mb-2">Options & Correct Answer</label>
+                  <div className="space-y-3">
+                    {qFormData.options.map((opt, i) => (
+                      <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border-2 ${qFormData.correctIndex === i ? 'border-emerald-500 bg-emerald-500/10' : 'border-border bg-input/30'}`}>
+                        <input
+                          type="radio"
+                          name="correctAnswer"
+                          checked={qFormData.correctIndex === i}
+                          onChange={() => setQFormData(prev => ({ ...prev, correctIndex: i }))}
+                          className="w-5 h-5 accent-emerald-500"
+                        />
+                        <div className="grid h-8 w-8 place-items-center rounded-md gold-panel font-display font-black text-sm shrink-0">
+                          {String.fromCharCode(65 + i)}
+                        </div>
+                        <input
+                          type="text"
+                          value={opt}
+                          onChange={e => {
+                            const newOpts = [...qFormData.options];
+                            newOpts[i] = e.target.value;
+                            setQFormData(prev => ({ ...prev, options: newOpts }));
+                          }}
+                          placeholder={`Option ${i + 1}`}
+                          className="w-full bg-transparent border-none focus:outline-none focus:ring-0 px-2"
+                          required
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">Select the radio button next to the correct option.</p>
+                </div>
+
+                <div className="flex gap-3 justify-end pt-4 border-t-2 border-border/50">
+                  <button type="button" onClick={() => setIsQuestionModalOpen(false)} className="btn-stone">Cancel</button>
+                  <button type="submit" className="btn-medieval">{editingQuestionId ? "Save Changes" : "Add Question"}</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       </div>
     </div>
   );
