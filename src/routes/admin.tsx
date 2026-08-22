@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Download, ListChecks, Play, RotateCcw, SkipForward, Square, Trophy, Users, Shield } from "lucide-react";
 import { useQuiz } from "@/store/quiz-store";
 import { Leaderboard } from "@/components/Leaderboard";
@@ -463,7 +463,6 @@ function Admin() {
           </div>
         )}
       </AnimatePresence>
-      </div>
     </div>
   );
 }
