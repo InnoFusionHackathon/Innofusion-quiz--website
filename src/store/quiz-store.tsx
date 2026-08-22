@@ -399,7 +399,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setPhase = useCallback((_phase: QuestionPhase) => {
+  const setPhase = useCallback((_phase: QuizPhase) => {
     // Phases are now controlled by the server via Socket.IO events.
     // This is kept for local UI compatibility but doesn't need to do anything.
   }, []);
