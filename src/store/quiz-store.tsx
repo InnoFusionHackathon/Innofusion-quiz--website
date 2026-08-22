@@ -48,14 +48,14 @@ export type Participant = {
 };
 
 export type QuizStatus = "idle" | "lobby" | "running" | "finished";
-export type QuestionPhase = "intro" | "answering" | "reveal";
+export type QuizPhase = "intro" | "answering" | "reveal" | "leaderboard";
 
 export type QuizState = {
   status: QuizStatus;
   participants: Participant[];
   currentQuestionIndex: number;
   totalQuestions: number;
-  phase: QuestionPhase;
+  phase: QuizPhase;
   phaseStartedAt: number;
   currentQuestion: Question | null;
   correctAnswer: string | null;
@@ -90,7 +90,7 @@ type Ctx = {
   endQuiz: () => void;
   resetQuiz: () => void;
   nextQuestion: () => void;
-  setPhase: (p: QuestionPhase) => void;
+  setPhase: (p: QuizPhase) => void;
   submitAnswer: (
     participantId: string,
     selectedOption: string,
@@ -243,18 +243,23 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     });
 
     socket.on("show_correct_answer", (data: any) => {
-      console.log("✅ Phase 3 (Reveal):", data.correct_answer);
+      console.log("✅ Reveal phase:", data);
       setState((prev) => ({
         ...prev,
-        phase: "reveal",
-        phaseStartedAt: Date.now(),
+        phase: data.phase,
         correctAnswer: data.correct_answer,
-        currentQuestion: {
-          id: prev.currentQuestion?.id ?? "",
-          question: data.question,
-          options: data.options,
-          correct_answer: data.correct_answer,
-        },
+        // Make sure options are present for the final reveal UI
+        currentQuestion: prev.currentQuestion
+          ? { ...prev.currentQuestion, options: data.options }
+          : prev.currentQuestion,
+      }));
+    });
+
+    socket.on("show_leaderboard_phase", (data: any) => {
+      console.log("🏆 Leaderboard phase:", data);
+      setState((prev) => ({
+        ...prev,
+        phase: data.phase,
       }));
     });
 

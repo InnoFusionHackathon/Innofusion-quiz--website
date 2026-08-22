@@ -207,6 +207,57 @@ function Quiz() {
             </div>
           </div>
         )}
+
+        {/* Phase: leaderboard */}
+        {state.phase === "leaderboard" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="space-y-6"
+          >
+            <div className="wood-panel p-6">
+              <h2 className="font-display text-2xl font-black text-gold mb-6 flex items-center justify-center gap-2">
+                🏆 Live Standings 🏆
+              </h2>
+              <div className="space-y-3">
+                {state.leaderboard.slice(0, 5).map((p, i) => (
+                  <div key={p.id} className={`flex items-center justify-between p-4 rounded-xl border-2 ${p.id === me.id ? 'border-emerald-400 bg-emerald-500/20' : 'border-gold/30 bg-gold/5'}`}>
+                    <div className="flex items-center gap-4">
+                      <span className="font-display text-xl font-bold text-gold w-8 text-left">#{i + 1}</span>
+                      <span className="font-bold text-lg">{p.name}</span>
+                      {p.id === me.id && <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold ml-2">(You)</span>}
+                    </div>
+                    <div className="font-display font-black text-2xl text-gold">
+                      {p.score} <span className="text-sm text-muted-foreground font-sans">pts</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Show player's own rank if they are not in the top 5 */}
+            {(() => {
+              const myRank = state.leaderboard.findIndex(p => p.id === me.id) + 1;
+              if (myRank > 5) {
+                return (
+                  <div className="wood-panel p-4 flex items-center justify-between border-emerald-400 bg-emerald-500/10">
+                    <div className="flex items-center gap-4">
+                      <span className="font-display text-lg font-bold text-emerald-400 w-8 text-left">#{myRank}</span>
+                      <span className="font-bold text-emerald-400">Your Current Rank</span>
+                    </div>
+                    <div className="font-display font-black text-xl text-emerald-400">
+                      {me.score} <span className="text-xs text-muted-foreground font-sans">pts</span>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            <div className="text-center text-sm text-muted-foreground mt-4">
+              Waiting for the next battle...
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
